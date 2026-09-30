@@ -94,7 +94,8 @@ footer{text-align:center;opacity:.6;font-size:.85rem}
       <div class="form-grid">
         <div><label for="fn">نام</label><input id="fn" placeholder="مثلاً سارا" autocomplete="given-name"><div class="err" id="e-fn"></div></div>
         <div><label for="ln">نام خانوادگی</label><input id="ln" placeholder="مثلاً احمدی" autocomplete="family-name"><div class="err" id="e-ln"></div></div>
-        <div class="full"><label for="em">ایمیل</label><input id="em" type="email" dir="ltr" style="text-align:right" placeholder="name@example.com" autocomplete="email"><div class="err" id="e-em"></div></div>
+        <div><label for="sid">شماره دانشجویی</label><input id="sid" inputmode="numeric" dir="ltr" style="text-align:right" placeholder="مثلاً 40212345" maxlength="14" autocomplete="off"><div class="err" id="e-sid"></div></div>
+        <div><label for="em">ایمیل</label><input id="em" type="email" dir="ltr" style="text-align:right" placeholder="name@example.com" autocomplete="email"><div class="err" id="e-em"></div></div>
         <div class="full">
           <label>در جلسات کدام گرایش‌ها می‌خوای شرکت کنی؟ (چندتا هم می‌تونی انتخاب کنی)</label>
           <div class="dd" id="dd">
@@ -145,10 +146,14 @@ $("ddPanel").onchange=()=>{
   $("e-dd").textContent="";
 };
 
+const fa2en = s => s.replace(/[۰-۹]/g,d=>"۰۱۲۳۴۵۶۷۸۹".indexOf(d)).replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d));
+$("sid").addEventListener("input",()=>{$("sid").value=fa2en($("sid").value).replace(/\D/g,"")});
+
 function validate(){
   let ok=true; const set=(id,m)=>{$("e-"+id).textContent=m; if(m)ok=false};
   set("fn",$("fn").value.trim()?"":"نامت رو وارد کن 🙂");
   set("ln",$("ln").value.trim()?"":"نام خانوادگی‌ت رو وارد کن 🙂");
+  set("sid",/^\d{6,14}$/.test(fa2en($("sid").value.trim()))?"":"شماره دانشجویی رو درست وارد کن (فقط عدد) 🎓");
   set("em",/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test($("em").value.trim())?"":"یه ایمیل معتبر وارد کن 📧");
   set("dd",boxes().length?"":"حداقل یک گرایش انتخاب کن 👆");
   return ok;
@@ -157,7 +162,7 @@ function validate(){
 $("form").addEventListener("submit",async e=>{
   e.preventDefault();
   if($("hp").value||!validate())return;
-  const data={firstName:$("fn").value.trim(),lastName:$("ln").value.trim(),email:$("em").value.trim(),sessions:boxes()};
+  const data={firstName:$("fn").value.trim(),lastName:$("ln").value.trim(),studentId:fa2en($("sid").value.trim()),email:$("em").value.trim(),sessions:boxes()};
   const btn=$("btn"); btn.disabled=true; btn.textContent="در حال ثبت… ⏳";
   try{
     if(SCRIPT_URL.startsWith("PASTE")) console.warn("SCRIPT_URL تنظیم نشده؛ حالت نمایشی.");
